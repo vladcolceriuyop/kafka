@@ -3,6 +3,8 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**
 !**/src/test/**
+dev/kafka
+dev/zookeeper
 
 ### STS ###
 .apt_generated
@@ -14,7 +16,9 @@ target/
 .sts4-cache
 
 ### IntelliJ IDEA ###
-.idea
+!.idea/runConfigurations
+.idea/*.xml
+.idea/libraries
 *.iws
 *.iml
 *.ipr
@@ -29,8 +33,6 @@ build/
 
 ### VS Code ###
 .vscode/
-/dev/kafka/data/
-/dev/zookeeper/data/
 /.mvn/
 /mvnw
 /mvnw.cmd

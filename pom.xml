@@ -83,6 +83,10 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
 				<groupId>io.fabric8</groupId>
 				<artifactId>docker-maven-plugin</artifactId>
 				<version>0.32.0</version>
@@ -100,6 +104,20 @@
 									<name>kafka-network</name>
 									<alias>kafka-db</alias>
 								</network>
+								<env>
+									<POSTGRES_USER>postgres</POSTGRES_USER>
+									<POSTGRES_DB>postgres</POSTGRES_DB>
+									<KAFKA_USER>postgres</KAFKA_USER>
+									<KAFKA_DB>kafka_db</KAFKA_DB>
+								</env>
+								<volumes>
+									<bind>
+										<volume>dev/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d</volume>
+									</bind>
+								</volumes>
+								<ports>
+									<port>5432:5432</port>
+								</ports>
                                 <wait>
                                     <log>database system is ready to accept connections</log>
                                     <time>${postgres.timeout}</time>
@@ -150,11 +168,9 @@
 									<name>kafka-network</name>
 									<alias>kafka-kafka</alias>
 								</network>
-								<volumes>
-									<bind>
-										<volume>dev/kafka:/bitnami/kafka</volume>
-									</bind>
-								</volumes>
+								<ports>
+									<port>9092:9092</port>
+								</ports>
 							</run>
 						</image>
 					</images>
