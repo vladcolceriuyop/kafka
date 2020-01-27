@@ -16,8 +16,11 @@ public class KafkaAdminConfiguration {
     @Value(value="${spring.kafka.bootstrap-servers}")
     private String[] bootstrapAddresses;
 
-    @Value("${kafka.topic.example}")
-    private String exampleTopic;
+    @Value("${kafka.topic.simple}")
+    private String simpleTopic;
+
+    @Value("${kafka.topic.user}")
+    private String userTopic;
 
     @Bean
     public KafkaAdmin kafkaAdmin(){
@@ -27,7 +30,12 @@ public class KafkaAdminConfiguration {
     }
 
     @Bean
-    public NewTopic topicExample(){
-        return new NewTopic(exampleTopic,1,(short)1);
+    public NewTopic simpleTopic(){
+        return new NewTopic(simpleTopic,1,(short)1);
+    }
+
+    @Bean
+    public NewTopic userTopic(){
+        return new NewTopic(userTopic,1,(short)1);
     }
 }

@@ -3,7 +3,6 @@ package com.example.kafka.config;
 import com.example.kafka.model.User;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.apache.kafka.connect.json.JsonDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +10,7 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,9 +21,6 @@ public class KafkaConsumerConfiguration {
 
     @Value(value="${spring.kafka.bootstrap-servers}")
     private String[] bootstrapAddresses;
-
-    @Value("${kafka.topic.example}")
-    private String exampleTopic;
 
     @Bean
     public ConsumerFactory<String,String> consumerFactory(){
@@ -38,7 +35,7 @@ public class KafkaConsumerConfiguration {
         var config = getConsumerFactorySettings("group_json");
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
 
-        return new DefaultKafkaConsumerFactory<>(config);
+        return new DefaultKafkaConsumerFactory<>(config, new StringDeserializer(), new JsonDeserializer<>(User.class));
     }
 
     private Map<String, Object> getConsumerFactorySettings(String groupId) {

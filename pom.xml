@@ -131,11 +131,6 @@
 								<ports>
 									<port>2181:2181</port>
 								</ports>
-								<volumes>
-									<bind>
-										<volume>dev/zookeeper:/bitnami/zookeeper</volume>
-									</bind>
-								</volumes>
 								<env>
 									<ALLOW_ANONYMOUS_LOGIN>yes</ALLOW_ANONYMOUS_LOGIN>
 								</env>
@@ -175,6 +170,40 @@
 									<port>9092:9092</port>
 									<port>29092:29092</port>
 								</ports>
+								<wait>
+									<tcp>
+										<mode>mapped</mode>
+										<ports>
+											<port>9092</port>
+										</ports>
+									</tcp>
+									<time>${bit.zookeeper.timeout}</time>
+								</wait>
+								<dependsOn>
+									<container>zookeeper</container>
+								</dependsOn>
+							</run>
+						</image>
+						<image>
+							<alias>kafka-ui</alias>
+							<name>obsidiandynamics/kafdrop</name>
+							<run>
+								<env>
+									<KAFKA_BROKERCONNECT>kafka-kafka:9092</KAFKA_BROKERCONNECT>
+									<JVM_OPTS>-Xms32M -Xmx64M</JVM_OPTS>
+									<SERVER_SERVLET_CONTEXTPATH>/</SERVER_SERVLET_CONTEXTPATH>
+								</env>
+								<ports>
+									<port>9000:9000</port>
+								</ports>
+								<network>
+									<mode>custom</mode>
+									<name>kafka-network</name>
+									<alias>kafka-ui</alias>
+								</network>
+								<dependsOn>
+									<container>kafka-kafka</container>
+								</dependsOn>
 							</run>
 						</image>
 					</images>

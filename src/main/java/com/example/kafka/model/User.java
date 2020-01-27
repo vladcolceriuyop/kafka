@@ -5,6 +5,9 @@ public class User {
     private String department;
     private Long salary;
 
+    public User() {
+    }
+
     public User(String name, String department, Long salary) {
         this.name = name;
         this.department = department;
@@ -33,5 +36,14 @@ public class User {
 
     public void setSalary(Long salary) {
         this.salary = salary;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "name='" + name + '\'' +
+                ", department='" + department + '\'' +
+                ", salary=" + salary +
+                '}';
     }
 }

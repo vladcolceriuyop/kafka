@@ -10,17 +10,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("user")
-public class UserResource {
+@RequestMapping("simple")
+public class SimpleResource {
 
     @Autowired
-    KafkaTemplate<String, User> kafkaTemplate;
-    @Value("${kafka.topic.user}")
-    private String userTopic;
+    KafkaTemplate<String, String> kafkaTemplate;
+    @Value("${kafka.topic.simple}")
+    private String simpleTopic;
 
-    @GetMapping("/{name}")
-    public String post( @PathVariable("name") final String name){
-        kafkaTemplate.send(userTopic,new User(name,"IT",20000L))
+    @GetMapping("/{message}")
+    public String post( @PathVariable("message") final String message){
+        kafkaTemplate.send(simpleTopic, message)
                 .addCallback(System.out::println, System.out::println);
         return "Published successfully";
     }
