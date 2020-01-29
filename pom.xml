@@ -240,22 +240,16 @@
 								<entryPoint>
 									<exec>
 										<arg>java</arg>
+										<arg>-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:8000,suspend=n,server=y</arg>
 										<arg>-jar</arg>
 										<arg>/kafka-client/kafka-0.0.1-SNAPSHOT.jar</arg>
-<!--										<arg>-XX:TieredStopAtLevel=1</arg>-->
-<!--										<arg>-noverify</arg>-->
-<!--										<arg>-Dspring.output.ansi.enabled=always</arg>-->
-<!--										<arg>-Dcom.sun.management.jmxremote</arg>-->
-<!--										<arg>-Dspring.jmx.enabled=true</arg>-->
-<!--										<arg>-Dspring.liveBeansView.mbeanDomain</arg>-->
-<!--										<arg>-Dspring.application.admin.enabled=true</arg>-->
-<!--										<arg>-Dfile.encoding=UTF-8</arg>-->
 									</exec>
 								</entryPoint>
 							</build>
 							<run>
 								<ports>
 									<port>8081:8081</port>
+									<port>8000:8000</port>
 								</ports>
 								<network>
 									<mode>custom</mode>
