@@ -15,6 +15,8 @@
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
+		<project.basedir.src>${project.basedir}/src</project.basedir.src>
+		<project.basedir.src.docker>${project.basedir.src}/docker</project.basedir.src.docker>
 		<java.version>11</java.version>
 		<postgres.version>latest</postgres.version>
 		<postgres.timeout>20000</postgres.timeout>
@@ -96,7 +98,7 @@
 					<autoCreateCustomNetworks>true</autoCreateCustomNetworks>
 					<images>
                         <image>
-                            <alias>database</alias>
+                            <alias>kafka-db</alias>
                             <name>postgres:${postgres.version}</name>
                             <run>
 								<network>
@@ -206,8 +208,76 @@
 								</dependsOn>
 							</run>
 						</image>
+						<image>
+							<alias>kafka-client</alias>
+							<name>vladcolceriuklar/kafka-client</name>
+							<build>
+								<from>adoptopenjdk/openjdk11</from>
+								<assembly>
+									<name>kafka-client</name>
+									<inline>
+										<includeBaseDirectory>false</includeBaseDirectory>
+										<files>
+											<file>
+												<source>${project.build.directory}/${project.build.finalName}.jar</source>
+												<outputDirectory>/</outputDirectory>
+												<fileMode>0755</fileMode>
+											</file>
+											<file>
+												<source>${project.build.outputDirectory}/application.properties</source>
+												<outputDirectory>/</outputDirectory>
+												<fileMode>0644</fileMode>
+											</file>
+										</files>
+									</inline>
+								</assembly>
+								<ports>
+									<port>8081/tcp</port>
+								</ports>
+								<cmd>
+									bash
+								</cmd>
+								<entryPoint>
+									<exec>
+										<arg>java</arg>
+										<arg>-jar</arg>
+										<arg>/kafka-client/kafka-0.0.1-SNAPSHOT.jar</arg>
+<!--										<arg>-XX:TieredStopAtLevel=1</arg>-->
+<!--										<arg>-noverify</arg>-->
+<!--										<arg>-Dspring.output.ansi.enabled=always</arg>-->
+<!--										<arg>-Dcom.sun.management.jmxremote</arg>-->
+<!--										<arg>-Dspring.jmx.enabled=true</arg>-->
+<!--										<arg>-Dspring.liveBeansView.mbeanDomain</arg>-->
+<!--										<arg>-Dspring.application.admin.enabled=true</arg>-->
+<!--										<arg>-Dfile.encoding=UTF-8</arg>-->
+									</exec>
+								</entryPoint>
+							</build>
+							<run>
+								<ports>
+									<port>8081:8081</port>
+								</ports>
+								<network>
+									<mode>custom</mode>
+									<name>kafka-network</name>
+									<alias>kafka-client</alias>
+								</network>
+								<dependsOn>
+									<container>kafka-kafka</container>
+									<container>kafka-db</container>
+								</dependsOn>
+							</run>
+						</image>
 					</images>
 				</configuration>
+				<executions>
+					<execution>
+						<id>docker-build</id>
+						<goals>
+							<goal>build</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
