@@ -18,12 +18,30 @@
 		<project.basedir.src>${project.basedir}/src</project.basedir.src>
 		<project.basedir.src.docker>${project.basedir.src}/docker</project.basedir.src.docker>
 		<java.version>11</java.version>
+		<!--Network name-->
+		<network.name>kafka-network</network.name>
+		<!--Postgres parameters-->
+		<postgres.alias>kafka-db</postgres.alias>
+		<postgres.name>postgres</postgres.name>
 		<postgres.version>latest</postgres.version>
 		<postgres.timeout>20000</postgres.timeout>
-		<bit.kafka.version>latest</bit.kafka.version>
-		<bit.kafka.timeout>20000</bit.kafka.timeout>
-		<bit.zookeeper.version>latest</bit.zookeeper.version>
-		<bit.zookeeper.timeout>20000</bit.zookeeper.timeout>
+		<postgres.port>5432</postgres.port>
+		<!--Zookeeper parameters-->
+		<zookeeper.alias>zookeeper</zookeeper.alias>
+		<zookeeper.name>bitnami/zookeeper</zookeeper.name>
+		<zookeeper.version>latest</zookeeper.version>
+		<zookeeper.timeout>20000</zookeeper.timeout>
+		<zookeeper.port>2181</zookeeper.port>
+		<!--Kafka parameters-->
+		<kafka.props.alias>kafka</kafka.props.alias>
+		<kafka.props.name>bitnami/kafka</kafka.props.name>
+		<kafka.props.version>latest</kafka.props.version>
+		<kafka.props.timeout>20000</kafka.props.timeout>
+		<kafka.props.port>9092</kafka.props.port>
+		<kafka.props.port.internal>29092</kafka.props.port.internal>
+		<!--Kafka drop parameters-->
+		<kafka.ui.alias>kafka-ui</kafka.ui.alias>
+		<kafka.ui.name>obsidiandynamics/kafdrop</kafka.ui.name>
 	</properties>
 
 	<dependencies>
@@ -98,13 +116,13 @@
 					<autoCreateCustomNetworks>true</autoCreateCustomNetworks>
 					<images>
                         <image>
-                            <alias>kafka-db</alias>
-                            <name>postgres:${postgres.version}</name>
+                            <alias>${postgres.alias}</alias>
+                            <name>${postgres.name}:${postgres.version}</name>
                             <run>
 								<network>
 									<mode>custom</mode>
-									<name>kafka-network</name>
-									<alias>kafka-db</alias>
+									<name>${network.name}</name>
+									<alias>${postgres.alias}</alias>
 								</network>
 								<env>
 									<POSTGRES_USER>postgres</POSTGRES_USER>
@@ -118,7 +136,7 @@
 									</bind>
 								</volumes>
 								<ports>
-									<port>5432:5432</port>
+									<port>5432:${postgres.port}</port>
 								</ports>
                                 <wait>
                                     <log>database system is ready to accept connections</log>
@@ -127,71 +145,66 @@
                             </run>
                         </image>
 						<image>
-							<alias>zookeeper</alias>
-							<name>bitnami/zookeeper:${bit.zookeeper.version}</name>
+							<alias>${zookeeper.alias}</alias>
+							<name>${zookeeper.name}:${zookeeper.version}</name>
 							<run>
 								<ports>
-									<port>2181:2181</port>
+									<port>2181:${zookeeper.port}</port>
 								</ports>
 								<env>
 									<ALLOW_ANONYMOUS_LOGIN>yes</ALLOW_ANONYMOUS_LOGIN>
 								</env>
 								<network>
 									<mode>custom</mode>
-									<name>kafka-network</name>
-									<alias>kafka-zookeeper</alias>
+									<name>${network.name}</name>
+									<alias>${zookeeper.alias}</alias>
 								</network>
 								<wait>
 									<tcp>
 										<mode>mapped</mode>
 										<ports>
-											<port>2181</port>
+											<port>${zookeeper.port}</port>
 										</ports>
 									</tcp>
-									<time>${bit.zookeeper.timeout}</time>
+									<time>${zookeeper.timeout}</time>
 								</wait>
 							</run>
 						</image>
 						<image>
-							<alias>kafka-kafka</alias>
-							<name>bitnami/kafka:${bit.kafka.version}</name>
+							<alias>${kafka.props.alias}</alias>
+							<name>${kafka.props.name}:${kafka.props.version}</name>
 							<run>
 								<env>
 									<ALLOW_PLAINTEXT_LISTENER>yes</ALLOW_PLAINTEXT_LISTENER>
-									<KAFKA_CFG_ZOOKEEPER_CONNECT>kafka-zookeeper:2181</KAFKA_CFG_ZOOKEEPER_CONNECT>
+									<KAFKA_CFG_ZOOKEEPER_CONNECT>${zookeeper.alias}:${zookeeper.port}</KAFKA_CFG_ZOOKEEPER_CONNECT>
 									<KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP>PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT</KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP>
-									<KAFKA_CFG_LISTENERS>PLAINTEXT://:9092,PLAINTEXT_HOST://:29092</KAFKA_CFG_LISTENERS>
-									<KAFKA_CFG_ADVERTISED_LISTENERS>PLAINTEXT://kafka-kafka:9092,PLAINTEXT_HOST://localhost:29092</KAFKA_CFG_ADVERTISED_LISTENERS>
+									<KAFKA_CFG_LISTENERS>PLAINTEXT://:${kafka.props.port},PLAINTEXT_HOST://:${kafka.props.port.internal}</KAFKA_CFG_LISTENERS>
+									<KAFKA_CFG_ADVERTISED_LISTENERS>PLAINTEXT://${kafka.props.alias}:${kafka.props.port},PLAINTEXT_HOST://localhost:${kafka.props.port.internal}</KAFKA_CFG_ADVERTISED_LISTENERS>
 								</env>
 								<network>
 									<mode>custom</mode>
-									<name>kafka-network</name>
-									<alias>kafka-kafka</alias>
+									<name>${network.name}</name>
+									<alias>${kafka.props.alias}</alias>
 								</network>
 								<ports>
-									<port>9092:9092</port>
-									<port>29092:29092</port>
+									<port>9092:${kafka.props.port}</port>
+									<port>29092:${kafka.props.port.internal}</port>
 								</ports>
 								<wait>
-									<tcp>
-										<mode>mapped</mode>
-										<ports>
-											<port>9092</port>
-										</ports>
-									</tcp>
-									<time>${bit.zookeeper.timeout}</time>
+									<log>INFO \[KafkaServer id=[^\]]*\] started \(kafka.server.KafkaServer\)$</log>
+									<time>${kafka.props.timeout}</time>
 								</wait>
 								<dependsOn>
-									<container>zookeeper</container>
+									<container>${zookeeper.alias}</container>
 								</dependsOn>
 							</run>
 						</image>
 						<image>
-							<alias>kafka-ui</alias>
-							<name>obsidiandynamics/kafdrop</name>
+							<alias>${kafka.ui.alias}</alias>
+							<name>${kafka.ui.name}</name>
 							<run>
 								<env>
-									<KAFKA_BROKERCONNECT>kafka-kafka:9092</KAFKA_BROKERCONNECT>
+									<KAFKA_BROKERCONNECT>${kafka.props.alias}:${kafka.props.port}</KAFKA_BROKERCONNECT>
 									<JVM_OPTS>-Xms32M -Xmx64M</JVM_OPTS>
 									<SERVER_SERVLET_CONTEXTPATH>/</SERVER_SERVLET_CONTEXTPATH>
 								</env>
@@ -200,11 +213,11 @@
 								</ports>
 								<network>
 									<mode>custom</mode>
-									<name>kafka-network</name>
-									<alias>kafka-ui</alias>
+									<name>${network.name}</name>
+									<alias>${kafka.ui.alias}</alias>
 								</network>
 								<dependsOn>
-									<container>kafka-kafka</container>
+									<container>${kafka.props.alias}</container>
 								</dependsOn>
 							</run>
 						</image>
@@ -215,21 +228,7 @@
 								<from>adoptopenjdk/openjdk11</from>
 								<assembly>
 									<name>kafka-client</name>
-									<inline>
-										<includeBaseDirectory>false</includeBaseDirectory>
-										<files>
-											<file>
-												<source>${project.build.directory}/${project.build.finalName}.jar</source>
-												<outputDirectory>/</outputDirectory>
-												<fileMode>0755</fileMode>
-											</file>
-											<file>
-												<source>${project.build.outputDirectory}/application.properties</source>
-												<outputDirectory>/</outputDirectory>
-												<fileMode>0644</fileMode>
-											</file>
-										</files>
-									</inline>
+									<descriptor>${project.basedir}/src/assembly/kafka.xml</descriptor>
 								</assembly>
 								<ports>
 									<port>8081/tcp</port>
@@ -253,12 +252,12 @@
 								</ports>
 								<network>
 									<mode>custom</mode>
-									<name>kafka-network</name>
+									<name>${network.name}</name>
 									<alias>kafka-client</alias>
 								</network>
 								<dependsOn>
-									<container>kafka-kafka</container>
-									<container>kafka-db</container>
+									<container>${kafka.props.alias}</container>
+									<container>${postgres.alias}</container>
 								</dependsOn>
 							</run>
 						</image>
