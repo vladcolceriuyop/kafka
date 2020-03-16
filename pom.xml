@@ -42,6 +42,9 @@
 		<!--Kafka drop parameters-->
 		<kafka.ui.alias>kafka-ui</kafka.ui.alias>
 		<kafka.ui.name>obsidiandynamics/kafdrop</kafka.ui.name>
+		<!--Keycloak parameters-->
+		<keycloak.alias>keycloak-server</keycloak.alias>
+		<keycloak.name>jboss/keycloak</keycloak.name>
 	</properties>
 
 	<dependencies>
@@ -259,6 +262,19 @@
 									<container>${kafka.props.alias}</container>
 									<container>${postgres.alias}</container>
 								</dependsOn>
+							</run>
+						</image>
+						<image>
+							<alias>${keycloak.alias}</alias>
+							<name>${keycloak.name}</name>
+							<run>
+								<ports>
+									<port>8080:8080</port>
+								</ports>
+								<env>
+									<KEYCLOAK_USER>keycloak</KEYCLOAK_USER>
+									<KEYCLOAK_PASSWORD>keycloak</KEYCLOAK_PASSWORD>
+								</env>
 							</run>
 						</image>
 					</images>
