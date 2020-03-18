@@ -11,7 +11,7 @@ pipeline {
                 '''
                 sh '''
                     RANDOM=$(shuf -i 0-10 -n 1)
-                    if [ $RANDOM -lt 2 ] then
+                    if [ $RANDOM -lt 2 ]; then
                         exit 1
                     fi
                 '''
